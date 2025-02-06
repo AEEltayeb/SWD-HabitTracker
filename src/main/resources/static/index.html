@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #ffffff83;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        li:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background: #ff4757;
+            transform: scale(1.05);
+        }
+
+        input {
+            padding: 10px;
+            width: calc(100% - 110px);
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        #addButton { 
+            background: #4cd137;
+            margin-left: 10px;
+            padding: 10px 20px;
+        }
+
+        #addButton:hover {
+            background: #44bd32;
+        }
+
+        .streak {
+            font-size: 0.9em;
+            color: #ffdd59;
+            margin-left: 10px;
+        }
+
+        .complete-btn {
+            background: #3498db;
+            margin-left: 5px;
+        }
+
+        .complete-btn:hover {
+            background: #2980b9;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        li {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            input {
+                width: calc(100% - 90px);
+            }
+
+            #addButton {
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Habit Tracker</h1>
+        <ul id="habitList"></ul>
+        <div style="display: flex; align-items: center;">
+            <input type="text" id="habitInput" placeholder="Enter new habit">
+            <button id="addButton">Add Habit</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8080/habit";
+
+        async function fetchHabits() {
+            const response = await fetch(API_URL);
+            const habits = await response.json();
+            displayHabits(habits);
+        }
+
+        function displayHabits(habits) {
+            const list = document.getElementById("habitList");
+            list.innerHTML = "";
+            habits.forEach(habit => {
+                const li = document.createElement("li");
+                
+                // Habit name
+                const habitText = document.createElement("span");
+                habitText.textContent = habit.name;
+
+                // Streak counter
+                const streakText = document.createElement("span");
+                streakText.textContent = `🔥 Streak: ${habit.streak || 0}`;
+                streakText.classList.add("streak");
+
+                // Complete button
+                const completeButton = document.createElement("button");
+                completeButton.textContent = "✅ Complete";
+                completeButton.classList.add("complete-btn");
+                completeButton.onclick = async () => {
+                    await markCompleted(habit.id);
+                };
+
+                // Delete button
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "❌ Delete";
+                deleteButton.onclick = async () => {
+                    await deleteHabit(habit.id);
+                };
+
+                // Append elements
+                li.appendChild(habitText);
+                li.appendChild(streakText);
+                li.appendChild(completeButton);
+                li.appendChild(deleteButton);
+                list.appendChild(li);
+            });
+        }
+
+        async function addHabit() {
+            const habitName = document.getElementById("habitInput").value.trim();
+            if (!habitName) return alert("Please enter a habit name");
+
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: habitName })
+            });
+
+            document.getElementById("habitInput").value = "";
+            fetchHabits(); 
+        }
+
+        async function deleteHabit(id) {
+            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+            fetchHabits();
+        }
+
+        async function markCompleted(id) {
+            await fetch(`${API_URL}/${id}/complete`, { method: "POST" });
+            fetchHabits(); // Refresh UI after updating streak
+        }
+
+        document.getElementById("addButton").addEventListener("click", addHabit);
+
+        fetchHabits();
+    </script>
+</body>
+</html>
