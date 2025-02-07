@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class HabitController {
 
     // Mutable list (array list) to allow adding/removing habits
-    private List<Habit> db = new ArrayList<>(List.of(
+    public List<Habit> db = new ArrayList<>(List.of(
             new Habit(0, "Exercise"),
             new Habit(1, "Eat Healthy"),
             new Habit(2, "Sleep Well")));
@@ -37,20 +37,24 @@ public class HabitController {
 
     @GetMapping("/habit/{id}")
     public Habit getHabits(@PathVariable int id) {
-        Habit habit = db.get(id);
+        // Check if the ID is within bounds before accessing the list
         if (id < 0 || id >= db.size()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Habit not found");
         }
+        Habit habit = db.get(id); // Now safe to retrieve from the list
         return habit;
     }
 
     @DeleteMapping("/habit/{id}")
     public void deleteHabit(@PathVariable int id) {
-        Habit habit = db.remove(id);
+        // Check if the ID is within bounds before attempting to remove from the list
+        if (id < 0 || id >= db.size()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Habit not found");
+        }
+        Habit habit = db.remove(id); // Now safe to remove from the list
         if (habit == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Habit not found");
         }
-
     }
 
     @PostMapping("/habit")
