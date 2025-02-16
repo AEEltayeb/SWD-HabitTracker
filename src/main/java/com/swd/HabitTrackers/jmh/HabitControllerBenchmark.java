@@ -39,7 +39,8 @@ public class HabitControllerBenchmark {
     }
 
     @Benchmark
-    @SuppressWarnings("squid:S00112") // This suppresses the specific SonarCloud warning (check the rule code)
+    @SuppressWarnings("java:S2245") // Suppresses the SonarCloud warning for using PRNG in security-sensitive
+                                    // situations
     public void benchmarkAddHabit() {
         if (habitController.getHabits().size() > 100) { // Preventing excessive memory usage
             habitController.deleteHabit(0);
