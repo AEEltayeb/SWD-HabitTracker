@@ -5,7 +5,9 @@ import org.springframework.web.server.ResponseStatusException;
 import com.swd.HabitTrackers.Habit;
 import com.swd.HabitTrackers.HabitController;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadLocalRandom;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -41,7 +43,8 @@ public class HabitControllerBenchmark {
         if (habitController.getHabits().size() > 100) { // Preventing excessive memory usage
             habitController.deleteHabit(0);
         }
-        habitController.postHabit(new Habit((int) (Math.random() * 1000), "New Habit"));
+        int randomId = ThreadLocalRandom.current().nextInt(1000); // More efficient and thread-safe
+        habitController.postHabit(new Habit(randomId, "New Habit"));
     }
 
     @Benchmark
