@@ -39,6 +39,7 @@ public class HabitControllerBenchmark {
     }
 
     @Benchmark
+    @SuppressWarnings("squid:S00112") // This suppresses the specific SonarCloud warning (check the rule code)
     public void benchmarkAddHabit() {
         if (habitController.getHabits().size() > 100) { // Preventing excessive memory usage
             habitController.deleteHabit(0);
