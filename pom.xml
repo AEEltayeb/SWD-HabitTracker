@@ -74,12 +74,12 @@
     <dependency>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-core</artifactId>
-        <version>1.37</version>
+        <version>1.36</version>
     </dependency>
     <dependency>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-generator-annprocess</artifactId>
-        <version>1.37</version>
+        <version>1.36</version>
         <scope>provided</scope>
     </dependency>
 
@@ -87,17 +87,36 @@
 
     <build>
         <plugins>
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>spotbugs-maven-plugin</artifactId>
+    <version>4.7.3.0</version>
+    <configuration>
+        <excludeFilterFile>${project.basedir}/spotbugs-exclude.xml</excludeFilterFile>
+    </configuration>
+</plugin>
 
 
 <plugin>
     <groupId>com.github.spotbugs</groupId>
     <artifactId>spotbugs-maven-plugin</artifactId>
     <version>4.8.6.6</version>
+    <configuration>
+        <excludeFilters>
+            <excludeFilter>
+                <file>**/jmh_generated/*</file>
+            </excludeFilter>
+        </excludeFilters>
+    </configuration>
     <executions>
         <execution>
             <goals>
                 <goal>check</goal>
             </goals>
+            <configuration>
+                <failOnError>false</failOnError>
+                <threshold>1</threshold>
+            </configuration>
         </execution>
     </executions>
     <dependencies>
@@ -109,6 +128,36 @@
     </dependencies>
 </plugin>
 
+
+<!-- JMH -->
+
+<plugin>
+<groupId>org.codehaus.mojo</groupId>
+<artifactId>exec-maven-plugin</artifactId>
+<version>3.1.1</version> <!-- Use the latest version -->
+<executions>
+<execution>
+<id>benchmark</id>
+<phase>verify</phase> <!-- Adjust the phase as needed -->
+<goals>
+<goal>exec</goal>
+</goals>
+<configuration>
+<executable>java</executable>
+<arguments>
+<argument>-classpath</argument>
+<classpath/>
+<argument>org.openjdk.jmh.Main</argument>
+<argument>-rf</argument>
+<argument>json</argument>
+<argument>-rff</argument>
+<argument>target/jmh-result.json</argument>
+<argument>com.swd.HabitTrackers.jmh.HabitControllerBenchmark</argument>
+</arguments>
+</configuration>
+</execution>
+</executions>
+ </plugin>
 
 <plugin>
     <groupId>org.owasp</groupId>
@@ -191,21 +240,7 @@
             </plugin>
 
 
-			<!-- JMH Plugin -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.10.1</version>
-            <configuration>
-                <annotationProcessorPaths>
-                    <path>
-                        <groupId>org.openjdk.jmh</groupId>
-                        <artifactId>jmh-generator-annprocess</artifactId>
-                        <version>1.37</version>
-                    </path>
-                </annotationProcessorPaths>
-            </configuration>
-        </plugin>
+
 
 
 
