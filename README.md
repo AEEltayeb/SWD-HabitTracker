@@ -32,23 +32,6 @@ Developed as part of a Software dependability project, the application also inte
 | CI/CD | GitHub Actions |
 | Performance Testing | JMH |
 
----
-
-## Project Structure
-
-SWD-HabitTracker/
-├── src/
-│ ├── main/java/… # Core habit tracking logic
-│ └── test/java/… # Unit and integration tests
-├── randoop-tests/ # Automatically generated tests
-├── .mvn/ # Maven wrapper files
-├── Dockerfile # Container setup
-├── pom.xml # Maven project configuration
-├── spotbugs-exclude.xml # Sonar/FindSecBugs configuration
-└── README.md
-
-yaml
-Copy code
 
 ---
 
